@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "com.lorrdi.digitcomponents"
-        minSdk = 28
+        minSdk = 33
         targetSdk = 33
         versionCode = 1
         versionName = "1.0"
@@ -32,6 +32,9 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
+    }
+    buildFeatures {
+        viewBinding = true
     }
 }
 

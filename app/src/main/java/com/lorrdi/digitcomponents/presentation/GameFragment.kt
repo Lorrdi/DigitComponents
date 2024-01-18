@@ -4,15 +4,28 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.fragment.app.Fragment
-import com.lorrdi.digitcomponents.R
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.lorrdi.digitcomponents.databinding.FragmentGameBinding
 import com.lorrdi.digitcomponents.domain.entity.GameResult
-import com.lorrdi.digitcomponents.domain.entity.GameSettings
-import com.lorrdi.digitcomponents.domain.entity.Level
+import com.lorrdi.digitcomponents.presentation.viewmodels.GameViewModel
 
 class GameFragment : Fragment() {
-    private lateinit var level: Level
+
+    private val args by navArgs<GameFragmentArgs>()
+
+    private val viewModelFactory by lazy {
+        GameViewModelFactory(args.level, requireActivity().application)
+    }
+    private val viewModel: GameViewModel by lazy {
+        ViewModelProvider(
+            this, viewModelFactory
+        )[GameViewModel::class.java]
+    }
+
     private var _binding: FragmentGameBinding? = null
     private val binding: FragmentGameBinding
         get() = _binding ?: throw RuntimeException("FragmentGameBinding == null")
@@ -24,23 +37,11 @@ class GameFragment : Fragment() {
         return binding.root
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        parseArgs()
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.tvOption1.setOnClickListener {
-            launchGameFinishedFragment(
-                GameResult(
-                    true,
-                    10,
-                    10,
-                    GameSettings(0, 0, 0, 0)
-                )
-            )
-        }
+        binding.viewModel = viewModel
+        binding.lifecycleOwner = viewLifecycleOwner
+        observeViewModel()
     }
 
     override fun onDestroy() {
@@ -48,26 +49,20 @@ class GameFragment : Fragment() {
         _binding = null
     }
 
-    private fun parseArgs() {
-        level = requireArguments().getSerializable(KEY_LEVEL, Level::class.java) as Level
+    private fun observeViewModel() {
+
+        viewModel.gameResult.observe(viewLifecycleOwner) {
+            launchGameFinishedFragment(it)
+        }
     }
 
     private fun launchGameFinishedFragment(gameResult: GameResult) {
-        requireActivity().supportFragmentManager.beginTransaction().addToBackStack(null).replace(
-            R.id.main_container, GameFinishedFragment.newInstance(gameResult)
-        ).commit()
+        findNavController().navigate(
+            GameFragmentDirections.actionGameFragment2ToGameFinishedFragment2(
+                gameResult
+            )
+        )
+
     }
 
-    companion object {
-        const val NAME = "GameFragment"
-        private const val KEY_LEVEL = "level"
-        fun newInstance(level: Level): GameFragment {
-            val fragment = GameFragment().apply {
-                this.arguments = Bundle().apply {
-                    putSerializable(KEY_LEVEL, level)
-                }
-            }
-            return fragment
-        }
-    }
 }

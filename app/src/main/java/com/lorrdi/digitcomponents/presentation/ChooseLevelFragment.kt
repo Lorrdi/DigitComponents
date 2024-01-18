@@ -5,11 +5,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.lorrdi.digitcomponents.R
+import androidx.navigation.fragment.findNavController
 import com.lorrdi.digitcomponents.databinding.FragmentChooseLevelBinding
 import com.lorrdi.digitcomponents.domain.entity.Level
 
 class ChooseLevelFragment : Fragment() {
+
+
     private var _binding: FragmentChooseLevelBinding? = null
     private val binding: FragmentChooseLevelBinding
         get() = _binding ?: throw RuntimeException("FragmentChooseLevelBinding == null")
@@ -36,20 +38,10 @@ class ChooseLevelFragment : Fragment() {
     }
 
     private fun launchGameFragment(level: Level) {
-        requireActivity().supportFragmentManager.beginTransaction().replace(
-            R.id.main_container, GameFragment.newInstance(level)
-        ).addToBackStack(null).commit()
-    }
-
-    companion object {
-
-        const val NAME = "ChooseLevelFragment"
-
-        fun newInstance(): ChooseLevelFragment {
-            val args = Bundle()
-            val fragment = ChooseLevelFragment()
-            fragment.arguments = args
-            return fragment
-        }
+        findNavController().navigate(
+            ChooseLevelFragmentDirections.actionChooseLevelFragment2ToGameFragment2(
+                level
+            )
+        )
     }
 }
